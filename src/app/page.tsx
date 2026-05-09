@@ -33,7 +33,7 @@ export default function LandingPage() {
           <i className="ti ti-check text-success" /> 한국어 특화
         </span>
         <span>
-          <i className="ti ti-check text-success" /> 슬랙 연동
+          <i className="ti ti-check text-success" /> AI 과업 분해
         </span>
       </div>
     </div>
