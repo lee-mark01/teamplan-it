@@ -107,7 +107,7 @@ export default function TimelinePage({ params }: { params: Promise<{ projectId: 
         </div>
 
         {/* 요약 카드 */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           {[
             { label: "총 작업", value: `${totalTasks}개`, color: "#0f172a" },
             { label: "진행중", value: `${inProgressTasks}개`, color: "#2563eb" },

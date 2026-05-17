@@ -18,8 +18,8 @@ export default function Sidebar() {
   const [user, setUser] = useState<{ display_name: string; email: string } | null>(null);
   const [projects, setProjects] = useState<SidebarProject[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  // 현재 프로젝트 ID 추출
   const projectIdMatch = pathname.match(/^\/([0-9a-f-]{36})/);
   const currentProjectId = projectIdMatch?.[1];
 
@@ -44,6 +44,11 @@ export default function Sidebar() {
     }
     load();
   }, []);
+
+  // 페이지 이동 시 모바일 메뉴 닫기
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -73,13 +78,22 @@ export default function Sidebar() {
     );
   };
 
-  return (
-    <aside className="w-[220px] h-screen bg-[#e4eff3] border-r border-border flex flex-col shrink-0">
+  const sidebarContent = (
+    <>
       {/* Logo + Search */}
       <div className="p-4 border-b border-border">
-        <Link href="/projects" className="text-lg font-bold tracking-tight block mb-3">
-          Teamplan-it
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/projects" className="text-lg font-bold tracking-tight block mb-3">
+            Teamplan-it
+          </Link>
+          {/* 모바일 닫기 버튼 */}
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="md:hidden text-text-2 mb-3 cursor-pointer"
+          >
+            <i className="ti ti-x text-lg" />
+          </button>
+        </div>
         <div className="relative">
           <i className="ti ti-search absolute left-2.5 top-1/2 -translate-y-1/2 text-text-3 text-sm" />
           <input
@@ -96,7 +110,6 @@ export default function Sidebar() {
       <nav className="flex-1 overflow-y-auto p-3 space-y-1">
         {navItem("/projects", "home", "홈")}
 
-        {/* 진행 중인 프로젝트 */}
         <div className="mt-4 mb-1">
           <span className="px-3 text-[11px] font-medium text-text-3 uppercase tracking-wider">
             진행 중인 프로젝트
@@ -131,7 +144,6 @@ export default function Sidebar() {
           새 프로젝트 추가
         </Link>
 
-        {/* 프로젝트 선택 시 하위 메뉴 */}
         {currentProjectId && (
           <>
             <div className="border-t border-border my-3" />
@@ -167,6 +179,36 @@ export default function Sidebar() {
           </div>
         )}
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* 모바일 햄버거 버튼 */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="md:hidden fixed top-4 left-4 z-50 bg-white border border-border rounded-lg p-2 shadow-sm cursor-pointer"
+      >
+        <i className="ti ti-menu-2 text-lg text-text" />
+      </button>
+
+      {/* 모바일 오버레이 */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/30 z-40"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* 사이드바 - 데스크톱: 항상 표시, 모바일: 토글 */}
+      <aside className={`
+        h-screen bg-[#e4eff3] border-r border-border flex flex-col shrink-0
+        fixed md:static z-50 transition-transform duration-200
+        w-[260px] md:w-[220px]
+        ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+      `}>
+        {sidebarContent}
+      </aside>
+    </>
   );
 }
