@@ -43,13 +43,13 @@ export default function LandingPage() {
             title="강점 기반"
             subtitle="공평한 업무 배분"
             description="해당 팀 프로젝트에 성격에 맞는 전문적 조언 및 가이드라인을 제시해요."
-            image="/feature-dashboard.png"
+            image="/feature-input.png"
           />
           <FeatureCard
             title="팀플 일정 및"
             subtitle="진척도 관리"
             description="AI가 직접 팀플 일정과 진척도 관리를 진행해줍니다."
-            image="/feature-comment.png"
+            image="/feature-dashboard.png"
           />
           <FeatureCard
             title="포기하지마!"
