@@ -18,10 +18,10 @@ export async function POST(request: NextRequest) {
     const { Resend } = await import("resend");
     const resend = new Resend(resendKey);
 
-    const inviteUrl = `${request.headers.get("origin") || "http://localhost:3000"}/invite/${token}`;
+    const inviteUrl = `${request.headers.get("origin") || "https://teamplanit.site"}/invite/${token}`;
 
     await resend.emails.send({
-      from: "Teamplan-it <onboarding@resend.dev>",
+      from: "Teamplan-it <noreply@teamplanit.site>",
       to: email,
       subject: "Teamplan-it 프로젝트에 초대되었습니다",
       html: `
