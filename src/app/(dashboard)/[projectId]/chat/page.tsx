@@ -219,7 +219,7 @@ function ChatInner({ projectId }: { projectId: string }) {
         <div ref={bottomRef} />
       </div>
 
-      <div style={{ padding: "16px 24px", borderTop: "1px solid #e7e5e4", background: "white" }}>
+      <div style={{ padding: "12px 16px", borderTop: "1px solid #e7e5e4", background: "white" }}>
         {file && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, padding: "8px 12px", background: "#f5f5f4", borderRadius: 8, fontSize: 12 }}>
             <span>📎 {file.name}</span>
@@ -236,7 +236,7 @@ function ChatInner({ projectId }: { projectId: string }) {
           />
           <button
             onClick={() => fileInputRef.current?.click()}
-            style={{ padding: "12px", background: "none", border: "1px solid #d6d3d1", borderRadius: 12, cursor: "pointer", fontSize: 16, color: "#57534e" }}
+            style={{ padding: "8px", background: "none", border: "1px solid #d6d3d1", borderRadius: 8, cursor: "pointer", fontSize: 14, color: "#57534e", flexShrink: 0 }}
             title="파일 첨부"
           >
             📎
@@ -247,12 +247,12 @@ function ChatInner({ projectId }: { projectId: string }) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleSend(); } }}
             placeholder="Teamplan-it 에게 물어보기"
-            style={{ flex: 1, border: "1px solid #d6d3d1", borderRadius: 12, padding: "12px 16px", fontSize: 13, outline: "none" }}
+            style={{ flex: 1, minWidth: 0, border: "1px solid #d6d3d1", borderRadius: 10, padding: "10px 12px", fontSize: 13, outline: "none" }}
           />
           <button
             onClick={handleSend}
             disabled={loading || (!input.trim() && !file)}
-            style={{ padding: "12px 16px", background: loading || (!input.trim() && !file) ? "#a8a29e" : "#1c1917", color: "white", borderRadius: 12, border: "none", cursor: "pointer" }}
+            style={{ padding: "10px 14px", background: loading || (!input.trim() && !file) ? "#a8a29e" : "#1c1917", color: "white", borderRadius: 10, border: "none", cursor: "pointer", flexShrink: 0, fontSize: 13 }}
           >
             전송
           </button>

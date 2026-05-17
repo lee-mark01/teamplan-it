@@ -50,8 +50,8 @@ export default function ProgressPage({ params }: { params: Promise<{ projectId: 
           <span className="text-xs text-text-3">{today}</span>
         </div>
 
-        <div className="bg-white border border-border rounded-[var(--radius-lg)] overflow-hidden">
-          <table className="w-full">
+        <div className="bg-white border border-border rounded-[var(--radius-lg)] overflow-x-auto">
+          <table className="w-full min-w-[640px]">
             <thead>
               <tr className="border-b border-border bg-surface-2">
                 <th className="px-4 py-3 text-left text-xs font-medium text-text-2">상태</th>

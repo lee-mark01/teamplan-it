@@ -126,12 +126,12 @@ export default function NewProjectPage() {
             <button
               type="button"
               onClick={() => update("isPrivate", !form.isPrivate)}
-              className={`px-3 py-2 rounded-[var(--radius)] text-xs font-medium flex items-center gap-1 transition-all ${
+              className={`px-2 py-2 rounded-[var(--radius)] text-xs font-medium flex items-center gap-1 transition-all shrink-0 ${
                 form.isPrivate ? "bg-primary text-primary-text" : "bg-surface-2 text-text-2 hover:bg-surface"
               }`}
             >
               <i className={`ti ti-${form.isPrivate ? "lock" : "lock-open"} text-sm`} />
-              {form.isPrivate ? "비공개" : "공개"}
+              <span className="hidden sm:inline">{form.isPrivate ? "비공개" : "공개"}</span>
             </button>
           </div>
         </div>

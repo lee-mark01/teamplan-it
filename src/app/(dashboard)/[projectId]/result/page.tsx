@@ -137,8 +137,8 @@ function Timeline({ timelines, nodes }: { timelines: TimelineData[]; nodes: Anal
   }
 
   return (
-    <div className="bg-surface border border-border rounded-[var(--radius-lg)] p-6">
-      <div className="space-y-8">
+    <div className="bg-surface border border-border rounded-[var(--radius-lg)] p-4 md:p-6 overflow-x-auto">
+      <div className="space-y-8 min-w-[400px]">
         {timelines.map((tl, i) => {
           const bgColor = COLOR_BG[tl.memberColor] || COLOR_BG.blue;
           const textColor = COLOR_TEXT[tl.memberColor] || COLOR_TEXT.blue;
