@@ -200,13 +200,13 @@ export default function Sidebar() {
         />
       )}
 
-      {/* 사이드바 - 데스크톱: 항상 표시, 모바일: 토글 */}
-      <aside className={`
-        h-screen bg-[#e4eff3] border-r border-border flex flex-col shrink-0
-        fixed md:static z-50 transition-transform duration-200
-        w-[260px] md:w-[220px]
-        ${mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-      `}>
+      {/* 데스크톱 사이드바 */}
+      <aside className="hidden md:flex w-[220px] h-screen bg-[#e4eff3] border-r border-border flex-col shrink-0">
+        {sidebarContent}
+      </aside>
+
+      {/* 모바일 사이드바 */}
+      <aside className={`md:hidden fixed top-0 left-0 w-[260px] h-screen bg-[#e4eff3] border-r border-border flex flex-col z-50 transition-transform duration-200 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
         {sidebarContent}
       </aside>
     </>
