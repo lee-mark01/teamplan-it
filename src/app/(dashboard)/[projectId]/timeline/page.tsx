@@ -10,9 +10,18 @@ const COLOR_MAP: Record<string, { bg: string; text: string }> = {
   coral: { bg: "bg-coral-bg", text: "text-coral" },
 };
 
+const BAR_COLORS: Record<string, string> = {
+  planning: "#6d28d9", design: "#0f766e", backend: "#2563eb", frontend: "#c2410c",
+  integration: "#57534e", qa: "#b45309", presentation: "#047857", research: "#6d28d9", content: "#0f766e",
+};
+
 interface Task {
-  id: string; label: string; progress: number; status: string; sort_order: number;
+  id: string; label: string; category: string; progress: number; status: string;
   assignee: { id: string; display_name: string; color: string } | null;
+}
+
+interface SnapshotNode {
+  id: string; label: string; day: string; assignee: string; category: string;
 }
 
 export default function TimelinePage({ params }: { params: Promise<{ projectId: string }> }) {
@@ -21,6 +30,7 @@ export default function TimelinePage({ params }: { params: Promise<{ projectId: 
 
   const [project, setProject] = useState<{ name: string; start_date: string | null; end_date: string } | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [snapshotNodes, setSnapshotNodes] = useState<SnapshotNode[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,11 +40,24 @@ export default function TimelinePage({ params }: { params: Promise<{ projectId: 
 
       const { data: taskData } = await supabase
         .from("tasks")
-        .select("id, label, progress, status, sort_order, assignee_id, project_members!tasks_assignee_id_fkey(id, display_name, color)")
+        .select("id, label, category, progress, status, sort_order, assignee_id, project_members!tasks_assignee_id_fkey(id, display_name, color)")
         .eq("project_id", projectId)
         .order("sort_order");
 
       if (taskData) setTasks(taskData.map((t: any) => ({ ...t, assignee: t.project_members || null })));
+
+      // AI 분석 결과에서 Day 정보 가져오기
+      const { data: snapshot } = await supabase
+        .from("analysis_snapshots")
+        .select("result_json")
+        .eq("project_id", projectId)
+        .eq("is_active", true)
+        .single();
+
+      if (snapshot?.result_json?.nodes) {
+        setSnapshotNodes(snapshot.result_json.nodes);
+      }
+
       setLoading(false);
     }
     load();
@@ -55,6 +78,18 @@ export default function TimelinePage({ params }: { params: Promise<{ projectId: 
     return d;
   });
 
+  // snapshot nodes에서 Day 정보 파싱
+  function parseDayRange(day: string): { start: number; end: number } {
+    const match = day?.match(/Day\s*(\d+)(?:\s*-\s*(\d+))?/);
+    if (match) {
+      const s = parseInt(match[1]);
+      const e = match[2] ? parseInt(match[2]) : s;
+      return { start: s, end: e };
+    }
+    return { start: 1, end: 1 };
+  }
+
+  // 팀원별 과업 + Day 매핑
   const members = [...new Map(tasks.filter((t) => t.assignee).map((t) => [t.assignee!.id, t.assignee!])).values()];
 
   return (
@@ -91,10 +126,17 @@ export default function TimelinePage({ params }: { params: Promise<{ projectId: 
                     </span>
                     <span className="text-xs font-medium truncate">{m.display_name}</span>
                   </div>
-                  <div className="flex-1 flex relative h-8 bg-surface-2 rounded">
-                    {memberTasks.map((t, ti) => {
-                      const startPct = (t.sort_order / Math.max(tasks.length, 1)) * 90;
-                      const widthPct = Math.max(8, 80 / Math.max(tasks.length, 1));
+                  <div className="flex-1 relative h-8 bg-surface-2 rounded" style={{ minWidth: totalDays * 40 }}>
+                    {memberTasks.map((t) => {
+                      // snapshot에서 Day 정보 매칭
+                      const node = snapshotNodes.find((n) => n.label === t.label);
+                      const dayRange = node ? parseDayRange(node.day) : { start: 1, end: 1 };
+
+                      const startPct = ((dayRange.start - 1) / totalDays) * 100;
+                      const widthPct = Math.max(5, ((dayRange.end - dayRange.start + 1) / totalDays) * 100);
+
+                      const barColor = t.status === "done" ? "#047857" : BAR_COLORS[t.category] || "#94a3b8";
+
                       return (
                         <div
                           key={t.id}
@@ -102,14 +144,12 @@ export default function TimelinePage({ params }: { params: Promise<{ projectId: 
                           style={{
                             left: `${startPct}%`,
                             width: `${widthPct}%`,
-                            backgroundColor: t.status === "done" ? "#047857" : t.progress > 0 ? "#2a5a6a" : "#94a3b8",
+                            backgroundColor: barColor,
+                            opacity: t.status === "done" ? 1 : t.progress > 0 ? 0.9 : 0.7,
                           }}
                         >
                           <span className="text-white text-[11px] font-medium whitespace-nowrap">{t.label}</span>
                           {t.status === "done" && <i className="ti ti-check text-white text-xs" />}
-                          {t.status !== "done" && t.progress > 0 && t.progress < 100 && (
-                            <span className="text-white/70 text-[10px]">{t.progress}%</span>
-                          )}
                         </div>
                       );
                     })}
