@@ -139,6 +139,8 @@ export default function DashboardPage({ params }: { params: Promise<{ projectId:
             <h3 className="text-base font-semibold">팀 타임라인</h3>
             <Link href={`/${projectId}/timeline`} className="text-xs text-accent hover:underline">자세히 보기 &gt;</Link>
           </div>
+          <div className="overflow-x-auto">
+          <div className="min-w-[500px]">
           <div className="mb-2 flex gap-1 text-[10px] text-text-3 ml-[70px]">
             {Array.from({ length: Math.min(totalDays, 20) }, (_, i) => {
               const d = new Date(startDate);
@@ -176,6 +178,8 @@ export default function DashboardPage({ params }: { params: Promise<{ projectId:
                 </div>
               );
             })}
+          </div>
+          </div>
           </div>
         </div>
 
