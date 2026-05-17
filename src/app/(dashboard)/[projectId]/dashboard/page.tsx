@@ -31,6 +31,7 @@ export default function DashboardPage({ params }: { params: Promise<{ projectId:
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [myId, setMyId] = useState<string | null>(null);
   const [myMemberId, setMyMemberId] = useState<string | null>(null);
+  const [snapshotNodes, setSnapshotNodes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,6 +70,15 @@ export default function DashboardPage({ params }: { params: Promise<{ projectId:
           if (cl) setChecklists(cl);
         }
       }
+      // snapshot에서 Day 정보 로드
+      const { data: snapshot } = await supabase
+        .from("analysis_snapshots")
+        .select("result_json")
+        .eq("project_id", projectId)
+        .eq("is_active", true)
+        .single();
+      if (snapshot?.result_json?.nodes) setSnapshotNodes(snapshot.result_json.nodes);
+
       setLoading(false);
     }
     load();
@@ -140,12 +150,12 @@ export default function DashboardPage({ params }: { params: Promise<{ projectId:
             <Link href={`/${projectId}/timeline`} className="text-xs text-accent hover:underline">자세히 보기 &gt;</Link>
           </div>
           <div className="overflow-x-auto">
-          <div className="min-w-[500px]">
-          <div className="mb-2 flex gap-1 text-[10px] text-text-3 ml-[70px]">
-            {Array.from({ length: Math.min(totalDays, 20) }, (_, i) => {
+          <div style={{ minWidth: Math.max(500, totalDays * 48 + 80) }}>
+          <div className="mb-2 flex text-[10px] text-text-3" style={{ marginLeft: 72 }}>
+            {Array.from({ length: totalDays }, (_, i) => {
               const d = new Date(startDate);
               d.setDate(d.getDate() + i);
-              return <span key={i} className={`flex-1 text-center ${i + 1 === currentDay ? "font-bold text-primary" : ""}`}>{d.getDate()}</span>;
+              return <span key={i} style={{ width: 48, minWidth: 48, textAlign: "center", fontWeight: i + 1 === currentDay ? 700 : 400, color: i + 1 === currentDay ? "#2a5a6a" : undefined }}>{d.getDate()}</span>;
             })}
           </div>
           <div className="space-y-2">
@@ -154,21 +164,24 @@ export default function DashboardPage({ params }: { params: Promise<{ projectId:
               const colors = COLOR_MAP[m.color] || COLOR_MAP.blue;
               return (
                 <div key={m.id} className="flex items-center gap-2">
-                  <div className="w-[62px] flex items-center gap-1.5 shrink-0">
+                  <div className="w-[64px] flex items-center gap-1.5 shrink-0">
                     <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-semibold ${colors.bg} ${colors.text}`}>
                       {m.display_name.charAt(0)}
                     </span>
                     <span className="text-xs truncate">{m.display_name.slice(0, 3)}</span>
                   </div>
-                  <div className="flex-1 relative h-7 bg-surface-2 rounded">
+                  <div className="relative h-7 bg-surface-2 rounded" style={{ width: totalDays * 48 }}>
                     {memberTasks.map((t) => {
-                      // 간단한 위치 계산 (sort_order 기반)
-                      const idx = tasks.indexOf(t);
-                      const start = (idx / Math.max(tasks.length, 1)) * 80;
-                      const width = Math.max(10, 80 / Math.max(tasks.length, 1));
+                      // snapshot에서 Day 정보 매칭
+                      const node = snapshotNodes.find((n: any) => n.label === t.label);
+                      const dayMatch = node?.day?.match(/Day\s*(\d+)(?:\s*-\s*(\d+))?/);
+                      const dayStart = dayMatch ? parseInt(dayMatch[1]) : 1;
+                      const dayEnd = dayMatch && dayMatch[2] ? parseInt(dayMatch[2]) : dayStart;
+                      const left = (dayStart - 1) * 48 + 2;
+                      const width = Math.max(44, (dayEnd - dayStart + 1) * 48 - 4);
                       const bgColor = t.status === "done" ? "#047857" : t.progress > 0 ? "#2a5a6a" : "#94a3b8";
                       return (
-                        <div key={t.id} className="absolute h-full rounded flex items-center px-1.5 overflow-hidden" style={{ left: `${start}%`, width: `${width}%`, backgroundColor: bgColor }}>
+                        <div key={t.id} className="absolute h-full rounded flex items-center px-1.5 overflow-hidden" style={{ left, width, backgroundColor: bgColor }}>
                           <span className="text-white text-[10px] font-medium whitespace-nowrap">{t.label}</span>
                           {t.status === "done" && <i className="ti ti-check text-white text-[10px] ml-0.5" />}
                         </div>
